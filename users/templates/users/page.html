@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; display: flex; min-height: 100vh; align-items: center; justify-content: center; }
+    .card { background: #fff; padding: 32px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); max-width: 380px; width: 100%; box-sizing: border-box; }
+    h1 { font-size: 22px; margin: 0 0 12px; }
+    .ok { color: #1a7f37; }
+    .err { color: #c62828; }
+    label { font-size: 14px; color: #444; }
+    input { width: 100%; padding: 10px; margin: 6px 0 14px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font-size: 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>{{ title }}</h1>
+    {% if message %}
+      <p class="{% if ok %}ok{% else %}err{% endif %}">{{ message }}</p>
+    {% endif %}
+    {% if show_form %}
+      {% for e in errors %}<p class="err">{{ e }}</p>{% endfor %}
+      <form method="post">
+        {% csrf_token %}
+        <label for="new_password">New password</label>
+        <input type="password" id="new_password" name="new_password" required>
+        <label for="confirm_password">Repeat password</label>
+        <input type="password" id="confirm_password" name="confirm_password" required>
+        <button type="submit">Change password</button>
+      </form>
+    {% endif %}
+  </div>
+</body>
+</html>
