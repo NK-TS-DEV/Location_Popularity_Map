@@ -11,6 +11,7 @@ from .serializers import ReviewSerializer, ReviewVoteSerializer
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """Дозвіл на редагування/видалення тільки для автора або адміна."""
+
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -19,7 +20,9 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["location", "author", "rating"]
 

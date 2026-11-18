@@ -35,7 +35,9 @@ class ReviewSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request and request.method == "POST":
             location = attrs.get("location")
-            if Review.objects.filter(location=location, author=request.user).exists():
+            if Review.objects.filter(
+                    location=location,
+                    author=request.user).exists():
                 raise serializers.ValidationError(
                     {"detail": "Ви вже залишили відгук до цієї локації."}
                 )
@@ -54,5 +56,6 @@ class ReviewVoteSerializer(serializers.ModelSerializer):
 
     def validate_value(self, value):
         if value not in [ReviewVote.LIKE, ReviewVote.DISLIKE]:
-            raise serializers.ValidationError("Значення повинно бути 1 (Like) або -1 (Dislike).")
+            raise serializers.ValidationError(
+                "Значення повинно бути 1 (Like) або -1 (Dislike).")
         return value

@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
+
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -15,7 +16,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
 
 
 class Location(models.Model):
@@ -36,8 +36,9 @@ class Location(models.Model):
         validators=[MinValueValidator(-180), MaxValueValidator(180)],
     )
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="locations"
-    )
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="locations")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -64,5 +65,3 @@ class Location(models.Model):
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.save(update_fields=["is_deleted", "deleted_at", "updated_at"])
-
-

@@ -34,7 +34,7 @@ class LocationViewSet(viewsets.ModelViewSet):
         DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
-        ]
+    ]
 
     filterset_class = LocationFilter
 
@@ -44,16 +44,23 @@ class LocationViewSet(viewsets.ModelViewSet):
     ordering = ["-created_at"]
 
     def get_queryset(self):
-        return Location.objects.filter(is_deleted=False).select_related(
-            "author", "category"
-        ).annotate(
-            rating=Coalesce(Avg("reviews__rating"), 0.0, output_field=FloatField()),
-            reviews_count=Count("reviews", distinct=True),
+        return Location.objects.filter(
+            is_deleted=False).select_related(
+            "author",
+            "category").annotate(
+            rating=Coalesce(
+                Avg("reviews__rating"),
+                0.0,
+                output_field=FloatField()),
+            reviews_count=Count(
+                "reviews",
+                distinct=True),
             popularity=ExpressionWrapper(
-                F("rating") * 2.0 + F("reviews_count") * 1.5,
-                output_field=FloatField()
-            )
-        )
+                F("rating")
+                * 2.0
+                + F("reviews_count")
+                * 1.5,
+                output_field=FloatField()))
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

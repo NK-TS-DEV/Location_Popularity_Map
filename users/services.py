@@ -63,7 +63,6 @@ class AuthService:
             link=link,
         )
 
-
     @staticmethod
     def register_user(validated_data, request):
         password = validated_data.pop("password")
@@ -101,9 +100,9 @@ class AuthService:
             try:
                 AuthService.send_verification_email(request, user)
             except Exception:
-                logger.exception("Verification email failed for user %s", user.pk)
+                logger.exception(
+                    "Verification email failed for user %s", user.pk)
         return True
-
 
     @staticmethod
     def login_user(request, email, password):
@@ -111,12 +110,16 @@ class AuthService:
         if user_obj is None:
             raise ValidationError("Invalid email or password.")
 
-        user = authenticate(request, username=user_obj.username, password=password)
+        user = authenticate(
+            request,
+            username=user_obj.username,
+            password=password)
         if user is None:
             raise ValidationError("Invalid email or password.")
 
         if not user.is_email_verified:
-            raise ValidationError("Email is not confirmed. Please check your inbox.")
+            raise ValidationError(
+                "Email is not confirmed. Please check your inbox.")
 
         login(request, user)
         return user
@@ -124,7 +127,6 @@ class AuthService:
     @staticmethod
     def logout_user(request):
         logout(request)
-
 
     @staticmethod
     def request_password_reset(request, email):
@@ -135,8 +137,11 @@ class AuthService:
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         link = request.build_absolute_uri(
-            reverse("password_reset_page", kwargs={"uidb64": uid, "token": token})
-        )
+            reverse(
+                "password_reset_page",
+                kwargs={
+                    "uidb64": uid,
+                    "token": token}))
 
         try:
             AuthService._send_action_email(
@@ -148,7 +153,8 @@ class AuthService:
                 link=link,
             )
         except Exception:
-            logger.exception("Password reset email failed for user %s", user.pk)
+            logger.exception(
+                "Password reset email failed for user %s", user.pk)
         return True
 
     @staticmethod

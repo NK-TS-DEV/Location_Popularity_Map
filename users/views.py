@@ -19,7 +19,6 @@ from .serializers import (
 from .services import AuthService
 
 
-
 class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializerRegister
@@ -42,7 +41,8 @@ class ResendVerificationView(APIView):
     def post(self, request):
         serializer = ResendVerificationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        AuthService.resend_verification_email(request, serializer.validated_data["email"])
+        AuthService.resend_verification_email(
+            request, serializer.validated_data["email"])
         return Response(
             {"detail": "If the account exists and is not confirmed, a new email has been sent."},
             status=status.HTTP_200_OK,
@@ -64,7 +64,8 @@ class LoginAPIView(APIView):
                 serializer.validated_data["password"],
             )
         except ValidationError as e:
-            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": e.messages},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         return Response(
             {"detail": "Successfully logged in!", "user": UserResponseSerializer(user).data},
@@ -77,7 +78,8 @@ class LogoutAPIView(APIView):
 
     def post(self, request):
         AuthService.logout_user(request)
-        return Response({"detail": "Successfully logged out!"}, status=status.HTTP_200_OK)
+        return Response({"detail": "Successfully logged out!"},
+                        status=status.HTTP_200_OK)
 
 
 class PasswordResetRequestView(APIView):
@@ -87,7 +89,8 @@ class PasswordResetRequestView(APIView):
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        AuthService.request_password_reset(request, serializer.validated_data["email"])
+        AuthService.request_password_reset(
+            request, serializer.validated_data["email"])
         return Response(
             {"detail": "If an account with this email exists, a reset link has been sent."},
             status=status.HTTP_200_OK,
@@ -109,19 +112,31 @@ class PasswordResetConfirmView(APIView):
                 new_password=serializer.validated_data["new_password"],
             )
         except ValidationError as e:
-            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": e.messages},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"detail": "Password successfully changed!"}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Password successfully changed!"}, status=status.HTTP_200_OK)
 
 
-
-def _page(request, *, title, message="", ok=True, show_form=False, errors=None, status_code=200):
-    return render(
+def _page(
         request,
-        "users/page.html",
-        {"title": title, "message": message, "ok": ok, "show_form": show_form, "errors": errors or []},
-        status=status_code,
-    )
+        *,
+        title,
+        message="",
+        ok=True,
+        show_form=False,
+        errors=None,
+        status_code=200):
+    return render(request,
+                  "users/page.html",
+                  {"title": title,
+                   "message": message,
+                   "ok": ok,
+                   "show_form": show_form,
+                   "errors": errors or []},
+                  status=status_code,
+                  )
 
 
 @require_GET
@@ -129,8 +144,16 @@ def verify_email_page(request, uidb64, token):
     try:
         AuthService.verify_email(uidb64, token)
     except ValidationError as e:
-        return _page(request, title="Email confirmation", message=e.messages[0], ok=False, status_code=400)
-    return _page(request, title="Email confirmed", message="Your email has been confirmed. You can now log in.")
+        return _page(
+            request,
+            title="Email confirmation",
+            message=e.messages[0],
+            ok=False,
+            status_code=400)
+    return _page(
+        request,
+        title="Email confirmed",
+        message="Your email has been confirmed. You can now log in.")
 
 
 @require_http_methods(["GET", "POST"])
@@ -140,18 +163,27 @@ def password_reset_page(request, uidb64, token):
     try:
         AuthService.get_user_by_reset_token(uidb64, token)
     except ValidationError as e:
-        return _page(request, title=title, message=e.messages[0], ok=False, status_code=400)
+        return _page(
+            request,
+            title=title,
+            message=e.messages[0],
+            ok=False,
+            status_code=400)
 
     if request.method == "GET":
         return _page(request, title=title, show_form=True)
 
     password = request.POST.get("new_password", "")
     if password != request.POST.get("confirm_password", ""):
-        return _page(request, title=title, show_form=True, errors=["Passwords do not match."])
+        return _page(request, title=title, show_form=True,
+                     errors=["Passwords do not match."])
 
     try:
         AuthService.confirm_password_reset(uidb64, token, password)
     except ValidationError as e:
         return _page(request, title=title, show_form=True, errors=e.messages)
 
-    return _page(request, title="Password changed", message="Your password has been changed. You can now log in.")
+    return _page(
+        request,
+        title="Password changed",
+        message="Your password has been changed. You can now log in.")

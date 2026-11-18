@@ -20,8 +20,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class LocationSerializer(serializers.ModelSerializer):
-    author = AuthorSerializer(read_only=True) 
-    category_name = serializers.CharField(source="category.name", read_only=True)
+    author = AuthorSerializer(read_only=True)
+    category_name = serializers.CharField(
+        source="category.name", read_only=True)
 
     class Meta:
         model = Location

@@ -7,4 +7,3 @@ router.register("categories", CategoryViewSet, basename="category")
 router.register("locations", LocationViewSet, basename="location")
 
 urlpatterns = router.urls
-
